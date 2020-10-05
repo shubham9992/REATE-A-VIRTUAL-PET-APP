@@ -1,5 +1,9 @@
 //Create variables here
 var dog,happyDog,database,foodS,foodStock;
+var feedPet,addFood;
+var fedTime,lastFed;
+var foodObj;
+
 function preload()
 {
 	//load images here
@@ -21,28 +25,44 @@ function setup() {
  // happyDog.addImage("happyDogImg",happyDogImg);
   happyDog.scale=0.1;
 
-}
+  foodObj=new Food();
 
+  // creating button
+  feedPet=createButton("Feed the Dog");
+  feedPet.position(600,95);
+  feedPet.mousePressed(feedDog);
+
+  addFood=createButton("add Food");
+  addFood.position(700,95);
+  addFood.mousePressed(addFoods);
+}
 
 function draw() {  
   background(rgb(46, 139, 87));
+  fedTime=database.ref('FeedTime');
+  fedTime.on("value",function (data) {
+    lastFed=data.val();
+  })
+
+  foodObj.display();
+  fill(255,255,254);
+  textSize(15);
+  if(lastFed>=12){
+    text("Last Feed : "+ lastFed%12 + " PM",350,30);
+  }
+  else if(lastFed==0){
+    text("Last Feed : 12 AM",350,30);
+  }
+  else{
+    text("Last Feed : "+ lastFed + " AM",350,30);
+  }
   textSize(20);
   fill("white");
-  //text("Food remaining : "+foodS,150,180);
   text("Food remaining : ",150,180);
   if(foodS){
       fill("yellow");
       text(foodS,310,180);
   }
-  
-  //add styles here
-  if(keyWentDown(UP_ARROW)&&foodS!==0){
-      writeStock(foodS);
-      dog.visible=false;
-      happyDog.addImage(happyDogImg);
-  }
-     
-  
   if(foodS===0){
     textSize(20);
     fill("red");
@@ -54,17 +74,15 @@ function draw() {
       dog.addImage(dogImg);
       dog.visible=true;
   }
+
+  
   drawSprites();
-  textSize(18);
-  fill("yellow");
-  text("NOTE:",40,50);
-  fill("white");
-  // stroke(10);
-  text("Press UP_ARROW key To Feed \"Drago Milk\"",100,50);
 }
+
 function readStock(data){
   foodS=data.val();
 }
+
 function writeStock(x){
   if(x<=0){
     x=0;
@@ -77,4 +95,18 @@ function writeStock(x){
   })
 }
 
+function feedDog() {
+  dog.addImage(happyDog);
+  foodObj.updateFoodStock(foodObj.getFoodStock()-1);
+  database.ref('/').update({
+    Food:foodObj.getFoodStock(),
+    FeedTime:hour()
+  })
+}
 
+function addFoods() {
+  foodS++;
+  database.ref('/').update({
+    Food:foodS
+  })
+}
