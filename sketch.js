@@ -22,7 +22,7 @@ function setup() {
   dog.addImage("dogImg",dogImg);
   dog.scale=0.1;
   happyDog=createSprite(250,250,10,10);
- // happyDog.addImage("happyDogImg",happyDogImg);
+ //happyDog.addImage("happyDogImg",happyDogImg);
   happyDog.scale=0.1;
 
   foodObj=new Food();
@@ -39,12 +39,13 @@ function setup() {
 
 function draw() {  
   background(rgb(46, 139, 87));
+  foodObj.display();
   fedTime=database.ref('FeedTime');
   fedTime.on("value",function (data) {
     lastFed=data.val();
   })
 
-  foodObj.display();
+  
   fill(255,255,254);
   textSize(15);
   if(lastFed>=12){
@@ -81,22 +82,23 @@ function draw() {
 
 function readStock(data){
   foodS=data.val();
+  foodObj.updateFoodStock(foodS);
 }
 
-function writeStock(x){
-  if(x<=0){
-    x=0;
-  }
-  else{
-    x=x-1;
-  }
-  database.ref('/').update({
-    Food:x
-  })
-}
+// function writeStock(x){
+//   if(x<=0){
+//     x=0;
+//   }
+//   else{
+//     x=x-1;
+//   }
+//   database.ref('/').update({
+//     Food:x
+//   })
+// }
 
 function feedDog() {
-  dog.addImage(happyDog);
+  dog.addImage(happyDogImg);
   foodObj.updateFoodStock(foodObj.getFoodStock()-1);
   database.ref('/').update({
     Food:foodObj.getFoodStock(),
